@@ -7,40 +7,38 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('accounts', '0002_initial'),
+        ("accounts", "0002_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Employee',
-            fields=[
-            ],
+            name="Employee",
+            fields=[],
             options={
-                'verbose_name': 'Employee',
-                'verbose_name_plural': 'Employees',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Employee",
+                "verbose_name_plural": "Employees",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('accounts.user',),
+            bases=("accounts.user",),
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
         migrations.CreateModel(
-            name='Manager',
-            fields=[
-            ],
+            name="Manager",
+            fields=[],
             options={
-                'verbose_name': 'Manager',
-                'verbose_name_plural': 'Managers',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Manager",
+                "verbose_name_plural": "Managers",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('accounts.user',),
+            bases=("accounts.user",),
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
     ]

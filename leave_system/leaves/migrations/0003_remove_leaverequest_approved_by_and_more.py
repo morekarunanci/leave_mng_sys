@@ -8,31 +8,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaves', '0002_leave'),
+        ("leaves", "0002_leave"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='leaverequest',
-            name='approved_by',
+            model_name="leaverequest",
+            name="approved_by",
         ),
         migrations.AddField(
-            model_name='leaverequest',
-            name='other_description',
+            model_name="leaverequest",
+            name="other_description",
             field=models.TextField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='leaverequest',
-            name='reviewed_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reviewed_leaves', to=settings.AUTH_USER_MODEL),
+            model_name="leaverequest",
+            name="reviewed_by",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="reviewed_leaves",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='leaverequest',
-            name='reviewed_on',
+            model_name="leaverequest",
+            name="reviewed_on",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.DeleteModel(
-            name='Leave',
+            name="Leave",
         ),
     ]

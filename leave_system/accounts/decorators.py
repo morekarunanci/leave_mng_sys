@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from functools import wraps
 
+
 def role_required(allowed_roles):
     def decorator(view_func):
         @wraps(view_func)
@@ -8,10 +9,10 @@ def role_required(allowed_roles):
 
             # ✅ Check login
             if not request.user.is_authenticated:
-                return redirect('login')
+                return redirect("login")
 
             # ✅ Get role safely
-            user_role = getattr(request.user, 'role', None)
+            user_role = getattr(request.user, "role", None)
 
             # 🔥 DEBUG (optional)
             print("USER:", request.user)
@@ -29,16 +30,17 @@ def role_required(allowed_roles):
             return view_func(request, *args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
 # 🔥 HELPER FUNCTION (clean redirect logic)
 def redirect_based_on_role(user_role):
-    if user_role == 'manager':
-        return redirect('manager_dashboard')
-    elif user_role == 'employee':
-        return redirect('employee_dashboard')
-    elif user_role == 'superuser':
-        return redirect('superuser_dashboard')
+    if user_role == "manager":
+        return redirect("manager_dashboard")
+    elif user_role == "employee":
+        return redirect("employee_dashboard")
+    elif user_role == "superuser":
+        return redirect("superuser_dashboard")
     else:
-        return redirect('login')
+        return redirect("login")

@@ -8,22 +8,36 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('leaves', '0003_remove_leaverequest_approved_by_and_more'),
+        ("leaves", "0003_remove_leaverequest_approved_by_and_more"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='LeaveBalance',
+            name="LeaveBalance",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('casual_total', models.IntegerField(default=15)),
-                ('medical_total', models.IntegerField(default=20)),
-                ('other_total', models.IntegerField(default=5)),
-                ('casual_used', models.IntegerField(default=0)),
-                ('medical_used', models.IntegerField(default=0)),
-                ('other_used', models.IntegerField(default=0)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("casual_total", models.IntegerField(default=15)),
+                ("medical_total", models.IntegerField(default=20)),
+                ("other_total", models.IntegerField(default=5)),
+                ("casual_used", models.IntegerField(default=0)),
+                ("medical_used", models.IntegerField(default=0)),
+                ("other_used", models.IntegerField(default=0)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]
