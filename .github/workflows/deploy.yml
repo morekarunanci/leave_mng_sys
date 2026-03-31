@@ -1,0 +1,49 @@
+name: 🚀 Deploy Django App to EC2
+
+on:
+push:
+branches:
+- main
+
+jobs:
+deploy:
+runs-on: ubuntu-latest
+
+```
+steps:
+
+- name: Checkout repository
+  uses: actions/checkout@v3
+
+- name: Setup SSH
+  run: |
+    mkdir -p ~/.ssh
+    echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+    chmod 600 ~/.ssh/id_rsa
+    ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+- name: Deploy to EC2
+  run: |
+    ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+
+    echo "🚀 Deployment Started"
+
+    cd ~/leave_mng_sys
+
+    git pull origin main
+
+    source venv/bin/activate
+
+    pip install -r leave-management-system/requirements.txt
+
+    cd leave-management-system/leave_system
+    python manage.py migrate
+    python manage.py collectstatic --noinput
+
+    sudo systemctl restart gunicorn
+    sudo systemctl restart nginx
+
+    echo "✅ Deployment Done"
+
+    EOF
+```
