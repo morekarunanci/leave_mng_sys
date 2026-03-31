@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Send Email{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">📧 Send Email</h2>
+
+    <div class="card shadow p-4">
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Receiver -->
+            <div class="mb-3">
+                <label class="form-label">Select Receiver</label>
+
+                <select name="receiver" class="form-control" required>
+                    {% for user in users %}
+                        <option value="{{ user.id }}"
+                            {% if selected_receiver and user.id == selected_receiver.id %}
+                                selected
+                            {% endif %}>
+                            {{ user.username }} ({{ user.role }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Subject -->
+            <div class="mb-3">
+                <label class="form-label">Subject</label>
+
+                <input type="text"
+                       name="subject"
+                       class="form-control"
+                       placeholder="Enter subject"
+                       required>
+            </div>
+
+            <!-- Message -->
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+
+                <textarea name="body"
+                          rows="5"
+                          class="form-control"
+                          placeholder="Write your message here..."
+                          required></textarea>
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between">
+
+                <a href="
+                    {% if request.user.role == 'superuser' %}
+                        {% url 'superuser_dashboard' %}
+                    {% elif request.user.role == 'manager' %}
+                        {% url 'manager_dashboard' %}
+                    {% else %}
+                        {% url 'employee_dashboard' %}
+                    {% endif %}
+                "
+                   class="btn btn-secondary">
+                    ⬅ Back
+                </a>
+
+                <button type="submit" class="btn btn-success">
+                    Send Email
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

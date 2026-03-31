@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h3 class="mb-4">📊 Dashboard</h3>
+
+<div class="row g-4">
+
+    <!-- Total -->
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Total Leaves</h6>
+            <h2>{{ stats.total }}</h2>
+        </div>
+    </div>
+
+    <!-- Pending -->
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Pending</h6>
+            <h2 class="text-warning">{{ stats.pending }}</h2>
+        </div>
+    </div>
+
+    <!-- Approved -->
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Approved</h6>
+            <h2 class="text-success">{{ stats.approved }}</h2>
+        </div>
+    </div>
+
+    <!-- Rejected -->
+    <div class="col-md-3">
+        <div class="card shadow text-center p-3">
+            <h6>Rejected</h6>
+            <h2 class="text-danger">{{ stats.rejected }}</h2>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

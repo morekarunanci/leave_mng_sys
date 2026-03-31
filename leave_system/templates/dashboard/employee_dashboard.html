@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Employee Dashboard{% endblock %}
+
+{% block content %}
+
+<br>
+<div class="position-relative d-flex align-items-center mb-4">
+    <div>
+        {% if request.user.profile_pic %}
+            <img src="{{ request.user.profile_pic.url }}"
+                style="width:60px;height:60px;border-radius:50%;object-fit:cover;">
+        {% endif %}
+    </div>
+
+    <h3 class="position-absolute start-50 translate-middle-x mb-0">
+        👨‍💻 Employee Dashboard
+    </h3>
+</div>
+
+<!-- 📊 LEAVE SUMMARY -->
+<div class="card p-3 shadow mb-4">
+    <h5>📊 Leave Breakdown</h5>
+
+    <p>
+        🌿 Casual: {{ leave_balance.casual_used }} / {{ leave_balance.casual_total }}
+    </p>
+
+    <p>
+        🏥 Medical: {{ leave_balance.medical_used }} / {{ leave_balance.medical_total }}
+    </p>
+
+    <p>
+        📁 Other: {{ leave_balance.other_used }} / {{ leave_balance.other_total }}
+    </p>
+</div>
+
+<!-- 🔥 ACTION BUTTONS -->
+<div class="card p-4 shadow text-center mb-4">
+    <div class="d-flex justify-content-center gap-3 flex-wrap">
+
+        <a href="{% url 'leaves:apply_leave' %}" class="btn btn-success px-4 py-2">
+            Apply Leave
+        </a>
+
+        <a href="{% url 'leaves:pending_leaves' %}" class="btn btn-warning px-4 py-2">
+            Pending
+        </a>
+
+        <a href="{% url 'leaves:leave_history' %}" class="btn btn-primary px-4 py-2">
+            History
+        </a>
+
+        <!-- 📧 EMAIL BUTTON -->
+        {% if request.user.manager %}
+        <button class="btn btn-info px-4 py-2 text-white"
+                data-bs-toggle="modal"
+                data-bs-target="#emailModal"
+                onclick="setReceiver('{{ request.user.manager.id }}', '{{ request.user.manager.email }}')">
+            📧 Email Manager
+        </button>
+        {% endif %}
+
+    </div>
+</div>
+
+<!-- 🔥 CALENDAR -->
+<div class="card shadow p-4 mb-4">
+
+    <h5 class="text-center mb-3">📅 Leave Planning Calendar</h5>
+
+    <input type="date" class="form-control mb-3">
+
+    <p class="text-muted text-center">
+        Select a date to plan your leave effectively.
+    </p>
+
+</div>
+
+<!-- 📧 EMAIL MODAL -->
+<div class="modal fade" id="emailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <form method="POST" action="{% url 'send_email' %}">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h5 class="modal-title">📧 Email Manager</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <label>To</label>
+                    <input type="text" id="receiverEmail" class="form-control" readonly>
+                    <input type="hidden" name="receiver" id="receiverId">
+
+                    <label class="mt-2">Subject</label>
+                    <input type="text" name="subject" class="form-control" required>
+
+                    <label class="mt-2">Message</label>
+                    <textarea name="body" class="form-control" rows="4" required></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        Send
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block title %}Inbox{% endblock %}
+{% block content %}
+
+<a href="{% if user.role == 'manager' %}{% url 'manager_dashboard' %}{% else %}{% url 'employee_dashboard' %}{% endif %}" 
+   class="btn btn-light border shadow-sm mb-3">
+    🏠 Home
+</a>
+
+<h3 class="text-center mb-4">📥 Inbox</h3>
+
+<div class="card p-4 shadow">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Status</th>
+                <th>From</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for mail in emails %}
+            <tr class="{% if not mail.is_read %}table-warning{% endif %}">
+                
+                <!-- STATUS -->
+                <td>
+                    {% if mail.is_read %}
+                        <span class="badge bg-success">Read</span>
+                    {% else %}
+                        <span class="badge bg-warning">Unread</span>
+                    {% endif %}
+                </td>
+
+                <!-- FROM -->
+                <td>{{ mail.sender.username }}</td>
+
+                <!-- SUBJECT -->
+                <td>
+                    <a href="#" 
+                       data-bs-toggle="modal" 
+                       data-bs-target="#viewModal{{ mail.id }}">
+                       {{ mail.subject }}
+                    </a>
+                </td>
+
+                <!-- DATE -->
+                <td>{{ mail.created_at|date:"d M Y H:i" }}</td>
+
+                <!-- ACTIONS -->
+                <td>
+                    <a href="{% url 'mark_as_read' mail.id %}" class="btn btn-sm btn-primary">
+                        ✔
+                    </a>
+                    <a href="{% url 'delete_email' mail.id %}" class="btn btn-sm btn-danger">
+                        🗑
+                    </a>
+                </td>
+
+            </tr>
+
+            <!-- 🔥 VIEW EMAIL MODAL -->
+            <div class="modal fade" id="viewModal{{ mail.id }}" tabindex="-1">
+              <div class="modal-dialog">
+                <div class="modal-content">
+
+                  <div class="modal-header">
+                    <h5 class="modal-title">{{ mail.subject }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                  </div>
+
+                  <div class="modal-body">
+                    <p><strong>From:</strong> {{ mail.sender.email }}</p>
+                    <p><strong>Date:</strong> {{ mail.created_at }}</p>
+                    <hr>
+                    <p>{{ mail.body }}</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">
+                    No emails yet 📭
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

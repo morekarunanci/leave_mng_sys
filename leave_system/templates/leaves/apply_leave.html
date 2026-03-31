@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Apply Leave{% endblock %}
+
+{% block content %}
+
+<!-- 🔙 BACK BUTTON -->
+<a href="{% if user.role == 'manager' %}{% url 'manager_dashboard' %}{% else %}{% url 'employee_dashboard' %}{% endif %}" 
+   class="btn btn-light-green shadow-sm mb-3">
+    ⬅ Back to Dashboard
+</a>
+
+<div class="card shadow">
+    
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">📝 Apply Leave</h5>
+    </div>
+
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+
+            <!-- Leave Type -->
+            <div class="mb-3">
+                <label class="form-label">Leave Type</label>
+                {{ form.leave_type }}
+            </div>
+
+            <!-- Start Date -->
+            <div class="mb-3">
+                <label class="form-label">Start Date</label>
+                {{ form.start_date }}
+            </div>
+
+            <!-- End Date -->
+            <div class="mb-3">
+                <label class="form-label">End Date</label>
+                {{ form.end_date }}
+            </div>
+
+            <!-- Reason -->
+            <div class="mb-3">
+                <label class="form-label">Reason</label>
+                {{ form.reason }}
+            </div>
+
+            <!-- OPTIONAL OTHER FIELD -->
+            <div class="mb-3" id="other-box" style="display:none;">
+                <label class="form-label">Specify Other</label>
+                <input type="text" class="form-control" name="other_reason">
+            </div>
+
+            <!-- Submit -->
+            <button class="btn btn-success w-100">Submit</button>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+<!-- 🔥 JS MUST BE INSIDE BLOCK OR AFTER CONTENT -->
+{% block extra_js %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const leaveType = document.querySelector('[name="leave_type"]');
+    const otherBox = document.getElementById('other-box');
+
+    function toggleOther() {
+        if (!leaveType) return;
+
+        const selectedText = leaveType.options[leaveType.selectedIndex].text.toLowerCase();
+
+        if (selectedText.includes('other')) {
+            otherBox.style.display = 'block';
+        } else {
+            otherBox.style.display = 'none';
+        }
+    }
+
+    toggleOther();
+    leaveType.addEventListener('change', toggleOther);
+});
+</script>
+{% endblock %}
