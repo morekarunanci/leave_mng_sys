@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+
+<h4 class="mb-4">🔔 Notifications</h4>
+
+<ul class="list-group">
+
+    {% for note in notifications %}
+        <li class="list-group-item">
+            {{ note.message }}
+            <br>
+            <small class="text-muted">{{ note.created_at }}</small>
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">
+            No notifications
+        </li>
+    {% endfor %}
+
+</ul>
+
+{% endblock %}

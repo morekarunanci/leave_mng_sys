@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+{% block title %}Superuser Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center">
+            <h2 class="me-3 mb-0">👑 Superuser Dashboard</h2>
+        
+            {% if request.user.profile_pic %}
+                <img src="{{ request.user.profile_pic.url }}"
+                    style="width:60px;height:60px;border-radius:50%;object-fit:cover;">
+            {% endif %}
+
+        </div>
+
+        <!-- Calendar Button -->
+        <button type="button"
+                class="btn btn-info"
+                onclick="openCalendarModal(event)">
+            📅 Calendar
+        </button>
+    </div>
+
+    <hr>
+
+    <!-- Managers Section -->
+    <h4 class="mb-3">🏢 Managers & Departments</h4>
+
+    {% for group in manager_data %}
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+
+            <!-- Department -->
+            <h5>🏢 {{ group.manager.department.name }}</h5>
+
+            <!-- Manager -->
+            <p class="mb-2">
+                👨‍💼
+                <a href="{% url 'leaves:leave_summary' group.manager.id %}" class="text-decoration-none">
+                    <strong>{{ group.manager.get_full_name }}</strong>
+                </a>
+            </p>
+
+            <!-- Email Manager -->
+            <div class="mb-3">
+                <a href="{% url 'send_email' %}?receiver={{ group.manager.id }}"
+                   class="btn btn-sm btn-outline-success">
+                    📧 Email Manager
+                </a>
+            </div>
+
+            <hr>
+
+            <!-- Employees -->
+            <h6>👥 Employees:</h6>
+
+            <ul class="list-group mt-2">
+                {% for emp in group.employees %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+
+                    <a href="{% url 'leaves:leave_summary' emp.id %}" class="text-decoration-none">
+                        {{ emp.get_full_name }}
+                    </a>
+
+                    <a href="{% url 'send_email' %}?receiver={{ emp.id }}"
+                       class="btn btn-sm btn-primary">
+                        📧 Email
+                    </a>
+
+                </li>
+
+                {% empty %}
+                <li class="list-group-item text-muted">
+                    No employees assigned
+                </li>
+                {% endfor %}
+            </ul>
+
+        </div>
+    </div>
+
+    {% empty %}
+        <p>No managers found.</p>
+    {% endfor %}
+
+    <!-- 🔥 PENDING MANAGER LEAVES -->
+    <div class="card p-4 shadow mt-4">
+
+        <h4 class="mb-3">📝 Pending Manager Leave Requests</h4>
+        <table class="table table-bordered mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Manager</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for leave in pending_manager_leaves %}
+                <tr>
+                    <td>{{ leave.employee.get_full_name }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+
+                    <td>
+                        <a href="{% url 'leaves:approve_leave' leave.id %}" class="btn btn-success btn-sm">✔️</a>
+                        <a href="{% url 'leaves:reject_leave' leave.id %}" class="btn btn-danger btn-sm">❌</a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No pending manager requests
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card p-4 shadow mt-4">
+        <h4 class="mb-3">📊 All Leave Decisions</h4>
+
+        {% if all_leaves %}
+        <table class="table table-bordered text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Status</th>
+                    <th>Approved By</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for leave in all_leaves %}
+                <tr>
+                    <td>{{ leave.employee.get_full_name }}</td>
+                    <td>{{ leave.employee.role|title }}</td>
+                    <td>{{ leave.start_date }}</td>
+                    <td>{{ leave.end_date }}</td>
+                    <td>
+                        {% if leave.status == 'Approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% elif leave.status == 'Rejected' %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ leave.reviewed_by.get_full_name|default:"-" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <p class="text-muted">No leave decisions available.</p>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ✅ CALENDAR MODAL -->
+<div class="modal fade" id="calendarModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">📅 Leave Calendar</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <div id="calendar"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 EVENT DETAIL MODAL -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header py-2">
+                <h6 class="modal-title">📌 Leave Details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="eventTitle"></p>
+                <p id="eventDates"></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ✅ FULLCALENDAR -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+<!-- 🔥 FINAL SCRIPT -->
+<script>
+let calendar = null;
+
+function openCalendarModal(e) {
+
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var modalEl = document.getElementById('calendarModal');
+    var modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    setTimeout(function () {
+
+        var calendarEl = document.getElementById('calendar');
+
+        if (calendar !== null) {
+            calendar.destroy();
+        }
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: "auto",
+
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+
+            // ✅ FIXED LOOP
+            events: [
+                {% for group in manager_data %}
+                    {% for emp in group.employees %}
+                        {% for leave in emp.leaverequest_set.all %}
+                        {
+                            title: "{{ emp.get_full_name }}",
+                            start: "{{ leave.start_date }}",
+                            end: "{{ leave.end_date }}",
+                            extendedProps: {
+                                status: "{{ leave.status }}"
+                            },
+                            color:
+                                "{% if leave.status == 'Approved' %}green{% elif leave.status == 'Pending' %}orange{% else %}red{% endif %}"
+                        },
+                        {% endfor %}
+                    {% endfor %}
+                {% endfor %}
+            ],
+
+            eventDidMount: function(info) {
+                info.el.title =
+                    info.event.title + " (" + info.event.extendedProps.status + ")";
+            },
+
+            eventClick: function(info) {
+
+                document.getElementById("eventTitle").innerHTML =
+                    "<strong>" + info.event.title + "</strong><br>Status: " +
+                    info.event.extendedProps.status;
+
+                document.getElementById("eventDates").innerHTML =
+                    "From: " + info.event.start.toLocaleDateString() +
+                    "<br>To: " +
+                    (info.event.end ? info.event.end.toLocaleDateString() : "N/A");
+
+                var eventModal = new bootstrap.Modal(
+                    document.getElementById('eventModal')
+                );
+
+                eventModal.show();
+            }
+
+        });
+
+        calendar.render();
+
+    }, 300);
+}
+</script>
+
+{% endblock %}

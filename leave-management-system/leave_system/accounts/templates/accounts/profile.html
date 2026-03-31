@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<!-- 🏠 HOME BUTTON (ROLE BASED) -->
+<a href="
+{% if user.role == 'manager' %}
+    {% url 'manager_dashboard' %}
+{% elif user.role == 'superuser' %}
+    {% url 'superuser_dashboard' %}
+{% else %}
+    {% url 'employee_dashboard' %}
+{% endif %}
+" 
+class="btn btn-light shadow-sm mb-3">
+    🏠 Home
+</a>
+
+<h3 class="mb-4">👤 My Profile</h3>
+
+<div class="card p-4 shadow">
+
+    <p><strong>Username:</strong> {{ user.username }}</p>
+    <p><strong>Email:</strong> {{ user.email }}</p>
+    <p><strong>Role:</strong> {{ user.role }}</p>
+
+    <!-- 🔥 ROLE BASED DISPLAY -->
+
+    {% if user.role == 'employee' %}
+        <p><strong>Manager:</strong> 
+            {% if user.manager %}
+                {{ user.manager.username }}
+            {% else %}
+                Not Assigned
+            {% endif %}
+        </p>
+
+        <p><strong>Department:</strong> 
+            {% if user.department %}
+                {{ user.department }}
+            {% else %}
+                Not Assigned
+            {% endif %}
+        </p>
+
+    {% elif user.role == 'manager' %}
+        <p><strong>Department:</strong> 
+            {% if user.department %}
+                {{ user.department }}
+            {% else %}
+                Not Assigned
+            {% endif %}
+        </p>
+    {% endif %}
+
+    <hr>
+
+    <!-- 🔥 PROFILE PIC UPDATE -->
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Update Profile Picture</label>
+            <input type="file" name="profile_pic" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+
+</div>
+
+{% endblock %}       

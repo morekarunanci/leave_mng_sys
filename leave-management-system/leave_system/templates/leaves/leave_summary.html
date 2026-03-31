@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% block title %}Leave Summary{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+
+        <h3 class="mb-0">
+            📋 Leave Summary - {{ user.get_full_name }}
+        </h3>
+
+        <div class="d-flex gap-2">
+
+            <!-- Calendar Button -->
+            <button type="button" class="btn btn-sm btn-info" onclick="openCalendarModal(event)">
+                📅 Calendar
+            </button>
+
+            <!-- Back Button -->
+            {% if request.user.role == 'superuser' %}
+                <a href="{% url 'superuser_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                    ⬅ Back
+                </a>
+            {% elif request.user.role == 'manager' %}
+                <a href="{% url 'manager_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                    ⬅ Back
+                </a>
+            {% else %}
+                <a href="{% url 'employee_dashboard' %}" class="btn btn-sm btn-outline-secondary">
+                    ⬅ Back
+                </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- Stats -->
+    <div class="row text-center">
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Total Requests</h6>
+                <h3>{{ total_leaves }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Approved</h6>
+                <h3 class="text-success">{{ approved }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Rejected</h6>
+                <h3 class="text-danger">{{ rejected }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Pending</h6>
+                <h3 class="text-warning">{{ pending }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- Balance -->
+    <h5 class="mb-3">📊 Leave Balance</h5>
+
+    <div class="row text-center">
+
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Total Allowed</h6>
+                <h4>{{ total_allowed }}</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Used</h6>
+                <h4 class="text-danger">{{ used }}</h4>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow">
+                <h6>Remaining</h6>
+                <h4 class="text-success">{{ remaining }}</h4>
+            </div>
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- Leave Table -->
+    <h5 class="mb-3">📋 Leave Records</h5>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Status</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for leave in leaves %}
+            <tr>
+                <td>{{ leave.start_date }}</td>
+                <td>{{ leave.end_date }}</td>
+                <td>
+                    {% if leave.status == "Approved" %}
+                        <span class="badge bg-success">Approved</span>
+                    {% elif leave.status == "Rejected" %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ leave.reason }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No records</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+
+<!-- ✅ CALENDAR MODAL -->
+<div class="modal fade" id="calendarModal" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header py-2">
+                <h6 class="modal-title mb-0">📅 Leave Calendar</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-2">
+                <div id="calendar"></div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- 🔥 EVENT DETAIL MODAL -->
+<div class="modal fade" id="eventModal" tabindex="-1">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header py-2">
+                <h6 class="modal-title">📌 Leave Details</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p id="eventTitle"></p>
+                <p id="eventDates"></p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ✅ FULLCALENDAR -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+
+
+<!-- 🔥 FINAL SCRIPT -->
+<script>
+let calendar = null;
+
+function openCalendarModal(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var modalEl = document.getElementById('calendarModal');
+    var modal = new bootstrap.Modal(modalEl);
+    modal.show();
+
+    setTimeout(function () {
+
+        var calendarEl = document.getElementById('calendar');
+
+        if (calendar !== null) {
+            calendar.destroy();
+        }
+
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            height: "auto",
+
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+
+            events: [
+                {% for leave in leaves %}
+                {
+                    title: "{{ leave.employee.get_full_name }}",
+                    start: "{{ leave.start_date }}",
+                    end: "{{ leave.end_date }}",
+                    extendedProps: {
+                        status: "{{ leave.status }}"
+                    },
+                    color:
+                        "{% if leave.status == 'Approved' %}green{% elif leave.status == 'Pending' %}orange{% else %}red{% endif %}"
+                },
+                {% endfor %}
+            ],
+
+            eventDidMount: function(info) {
+                info.el.title =
+                    info.event.title + " (" + info.event.extendedProps.status + ")";
+            },
+
+            eventClick: function(info) {
+                document.getElementById("eventTitle").innerHTML =
+                    "<strong>" + info.event.title + "</strong><br>Status: " +
+                    info.event.extendedProps.status;
+
+                document.getElementById("eventDates").innerHTML =
+                    "From: " + info.event.start.toLocaleDateString() +
+                    "<br>To: " +
+                    (info.event.end ? info.event.end.toLocaleDateString() : "N/A");
+
+                var eventModal = new bootstrap.Modal(
+                    document.getElementById('eventModal')
+                );
+                eventModal.show();
+            }
+
+        });
+
+        calendar.render();
+
+    }, 300);
+}
+</script>
+
+{% endblock %}
