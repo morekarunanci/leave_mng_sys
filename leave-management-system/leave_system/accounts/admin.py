@@ -8,44 +8,46 @@ from .models import User, Manager, Employee
 class CustomUserAdmin(BaseUserAdmin):
     model = User
 
-    list_display = ('username', 'email', 'role', 'department', 'manager', 'is_staff')
-    list_filter = ('role', 'department', 'is_staff')
+    list_display = ("username", "email", "role", "department", "manager", "is_staff")
+    list_filter = ("role", "department", "is_staff")
 
     # 🔥 Add your custom fields
     fieldsets = BaseUserAdmin.fieldsets + (
-        ('Additional Info', {
-            'fields': ('role', 'department', 'manager', 'profile_picture')
-        }),
+        (
+            "Additional Info",
+            {"fields": ("role", "department", "manager", "profile_picture")},
+        ),
     )
 
     # 🔥 Add fields when creating user
     add_fieldsets = BaseUserAdmin.add_fieldsets + (
-        ('Additional Info', {
-            'fields': ('role', 'department', 'manager', 'profile_picture')
-        }),
+        (
+            "Additional Info",
+            {"fields": ("role", "department", "manager", "profile_picture")},
+        ),
     )
 
-    search_fields = ('username', 'email')
-    ordering = ('username',)
+    search_fields = ("username", "email")
+    ordering = ("username",)
 
 
 # 🔥 Managers Section (Proxy Model)
 @admin.register(Manager)
 class ManagerAdmin(BaseUserAdmin):
     model = Manager
-    list_display = ('username', 'department', 'is_active')
+    list_display = ("username", "department", "is_active")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.filter(role='manager')
+        return qs.filter(role="manager")
 
 
 # 🔥 Employees Section (Proxy Model)
 @admin.register(Employee)
 class EmployeeAdmin(BaseUserAdmin):
     model = Employee
-    list_display = ('username', 'manager', 'department', 'is_active')
+    list_display = ("username", "manager", "department", "is_active")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.filter(role='employee')
+        return qs.filter(role="employee")

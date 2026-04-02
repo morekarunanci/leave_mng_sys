@@ -5,6 +5,7 @@ from leaves.models import LeaveBalance
 
 User = get_user_model()
 
+
 @receiver(post_save, sender=User)
 def create_leave_balance(sender, instance, created, **kwargs):
     if created:
