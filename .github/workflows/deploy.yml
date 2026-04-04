@@ -6,7 +6,8 @@ on:
       - main
 
 jobs:
-    # 🔍 JOB 1: Code Quality + Security Checks
+
+  # 🔍 JOB 1: Code Quality + Security Checks
   checks:
     runs-on: ubuntu-latest
 
@@ -22,35 +23,44 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-          pip install flake8 pylint bandit pip-audit
+          pip install flake8 pylint pylint-django bandit pip-audit
 
       - name: Run Flake8
-        run: flake8 .
+        run: |
+          flake8 leave-management-system \
+          --max-line-length=120 \
+          --exclude=venv,__pycache__,migrations
 
       - name: Run Pylint
-        run: pylint leave_management_system || true
+        run: |
+          pylint leave-management-system/leave_system/accounts \
+                 leave-management-system/leave_system/leaves \
+          --ignore=migrations \
+          --load-plugins=pylint_django \
+          --disable=C0114,C0115,C0116,R0903,R0801,C0103,W0613,W0612,R0911,R1705
 
       - name: Run Bandit (Security Scan)
-        run: bandit -r . -ll
+        run: |
+          bandit -r leave-management-system/leave_system \
+          -x venv,__pycache__,migrations,static,media
 
       - name: Run pip-audit (Dependency Scan)
         run: pip-audit
-        
+
+  # 🚀 JOB 2: Deployment (only if checks pass)
   deploy:
+    needs: checks   # 🔥 IMPORTANT
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Setup SSH connection
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.7.0
         with:
           ssh-private-key: ${{ secrets.EC2_KEY }}
 
-      # Step 3: Deploy to EC2
       - name: Deploy to EC2
         run: |
           ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
