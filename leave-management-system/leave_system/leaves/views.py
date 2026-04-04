@@ -2,10 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse
-
 from accounts.decorators import role_required
 from accounts.models import Notification, User
-
 from .forms import LeaveForm
 from .models import LeaveRequest, LeaveBalance
 
@@ -30,7 +28,8 @@ def apply_leave(request):
                 if request.user.manager:
                     Notification.objects.create(
                         user=request.user.manager,
-                        message=f"{request.user.username} applied for leave from {leave.start_date} to {leave.end_date}.",
+                        message=f"{request.user.username} applied for leave from"
+                        f"{leave.start_date} to {leave.end_date}.",
                     )
 
                 messages.success(request, "Leave applied successfully!")
@@ -48,7 +47,8 @@ def apply_leave(request):
                 for su in superusers:
                     Notification.objects.create(
                         user=su,
-                        message=f"Manager {request.user.username} applied for leave from {leave.start_date} to {leave.end_date}.",
+                        message=f"Manager {request.user.username} applied for leave from"
+                        f"{leave.start_date} to {leave.end_date}.",
                     )
 
                 messages.success(request, "Leave applied successfully!")
