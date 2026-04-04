@@ -230,7 +230,7 @@ def send_email(request):
                 [receiver.email],
                 fail_silently=True,
             )
-        except Exception:
+        except Exception as e:
             print(e)
 
         messages.success(request, "Email sent successfully!")

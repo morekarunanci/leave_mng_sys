@@ -28,8 +28,7 @@ jobs:
         run: flake8 .
 
       - name: Run Pylint
-        run: pylint online_voting_system || true
-        # ⚠️ don't fail pipeline yet (optional)
+        run: pylint leave_management_system || true
 
       - name: Run Bandit (Security Scan)
         run: bandit -r . -ll
